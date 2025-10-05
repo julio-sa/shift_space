@@ -1,7 +1,7 @@
 # backend/data/data_integration.py
 import pandas as pd
 import time
-from data.weather import get_air_quality_meteomatics, get_weather_data_meteomatics, get_weather_data_meteomatics_interval
+from .weather import get_air_quality_meteomatics, get_weather_data_meteomatics, get_weather_data_meteomatics_interval
 
 # === CONVERSÃO: µg/m³ e ppb → AQI (EPA) ===
 
