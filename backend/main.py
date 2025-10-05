@@ -7,9 +7,9 @@ from typing import Optional
 from dotenv import load_dotenv
 import os
 
-from data.data_integration import fetch_combined_data_single
-from data.geocoding import geocode_zip
-from models.ml_model import load_model, predict_risk
+from .data.data_integration import fetch_combined_data_single
+from .data.geocoding import geocode_zip
+from .models.ml_model import load_model, predict_risk
 
 app = FastAPI()
 load_dotenv()
