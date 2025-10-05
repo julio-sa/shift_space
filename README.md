@@ -60,8 +60,11 @@ Install dependencies:
 pip install -r requirements.txt
 
 Create .env in the backend/ folder:
+
 METEOMATICS_USERNAME=your_username
+
 METEOMATICS_PASSWORD=your_password
+
 OPENCAGE_API_KEY=your_key
 
 Start Server:
