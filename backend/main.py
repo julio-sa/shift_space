@@ -127,9 +127,13 @@ def get_model():
     return _model
 
 # ── Healthcheck simples ────────────────────────────────────────────────────────
-@app.get("/healthz")
-def healthz():
-    return {"status": "ok", "model_loaded": _model is not None}
+# Em main.py, adicione esta função
+@app.get("/")
+def root():
+    return {
+        "message": "Shift Space API - Respiratory Risk Prediction",
+        "docs": "/docs"
+    }
 
 # ── Endpoints ──────────────────────────────────────────────────────────────────
 @app.get("/air-quality/{zip_code}")
