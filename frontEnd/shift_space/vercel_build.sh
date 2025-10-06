@@ -1,42 +1,61 @@
 #!/usr/bin/env bash
 set -euo pipefail
+set -x  # DEBUG: loga cada comando
 
-# Opcional: log de debug
+# Trap para ver em que linha falhou
+trap 'ec=$?; echo "❌ Build failed at line $LINENO with exit code $ec"; exit $ec' ERR
+
+echo "=== ENV ==="
 echo "PWD=$(pwd)"
-uname -a
+echo "WHOAMI=$(whoami || true)"
+echo "VERCEL=$VERCEL"
+echo "LS ROOT:"
+ls -la
+echo "LS frontEnd/shift_space (sanity):"
+ls -la || true
 
-# Escolha um diretório do SDK fora do seu código para evitar colisões
+# Baixar Flutter para um diretório separado do código
 FLUTTER_ROOT="$PWD/_flutter"
 FLUTTER_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.3-stable.tar.xz"
 
 echo "➡️  Baixando Flutter SDK para $FLUTTER_ROOT ..."
 mkdir -p "$FLUTTER_ROOT"
-curl -L "$FLUTTER_URL" | tar -xJ -C "$FLUTTER_ROOT" --strip-components=1
+curl -fLsS "$FLUTTER_URL" | tar -xJ -C "$FLUTTER_ROOT" --strip-components=1
 
-# Corrige o erro 'dubious ownership' do git ao rodar flutter como root
-git config --global --add safe.directory "$FLUTTER_ROOT"
-# (às vezes o Flutter chama git em subpastas; por garantia)
-git config --global --add safe.directory "$FLUTTER_ROOT/.pub-cache"
-git config --global --add safe.directory "$FLUTTER_ROOT/bin/cache"
+# Git pode reclamar de 'dubious ownership'; marque tudo relacionado ao SDK como safe
+git config --global --add safe.directory "$FLUTTER_ROOT" || true
+git config --global --add safe.directory "$FLUTTER_ROOT/bin" || true
+git config --global --add safe.directory "$FLUTTER_ROOT/bin/cache" || true
+git config --global --add safe.directory "$FLUTTER_ROOT/.pub-cache" || true
+# fallback agressivo para CI: (aceitável em ambiente efêmero)
+git config --global --add safe.directory '*' || true
 
 export PATH="$FLUTTER_ROOT/bin:$PATH"
 export PUB_CACHE="$FLUTTER_ROOT/.pub-cache"
-export FLUTTER_STORAGE_BASE_URL="https://storage.googleapis.com"  # padrão
-export CHROME_EXECUTABLE=""  # evita tentativas de abrir Chrome no build
+export FLUTTER_STORAGE_BASE_URL="https://storage.googleapis.com"
+export CHROME_EXECUTABLE=""
+
+# Sanidade de ferramentas
+command -v git
+command -v curl
+command -v tar
 
 echo "➡️  Versão do Flutter:"
-# --suppress-analytics evita prompts/telemetria
 flutter --version --suppress-analytics || true
 
-echo "➡️  Habilitando Web e preparando cache..."
+echo "➡️  Precache/Habilitar web"
 flutter config --enable-web --suppress-analytics
 flutter precache --web --suppress-analytics
 
-echo "➡️  Dependencies"
+echo "➡️  flutter pub get"
 flutter pub get
 
+# Garanta que o projeto Flutter está mesmo aqui
+echo "=== ARQUIVOS DO PROJETO ==="
+ls -la .
+test -f "pubspec.yaml"  # falha com exit 1 se não estiver no diretório certo
+
 echo "➡️  Build web (release)"
-# API_BASE_URL vem das env vars do Vercel
 flutter build web --release \
   --dart-define=API_BASE_URL="${API_BASE_URL:-https://airaware-api.onrender.com}" \
   --suppress-analytics
