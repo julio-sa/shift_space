@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: shift-space-app
+    env: static
+    buildCommand: |
+      # Install Flutter
+      git clone https://github.com/flutter/flutter.git -b stable
+      export PATH="$PATH:`pwd`/flutter/bin"
+      
+      # Configure Flutter
+      flutter config --enable-web --no-analytics
+      flutter pub get
+      
+      # Build with optimizations
+      flutter build web --release --web-renderer html --dart-define=FLUTTER_WEB_USE_SKIA=false --base-href=/
+      
+    staticPublishPath: build/web
+    
+    # ✅ Headers otimizados para PWA
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-XSS-Protection
+        value: 1; mode=block
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /icons/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*.js
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*.css
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /manifest.json
+        name: Cache-Control
+        value: public, max-age=86400
