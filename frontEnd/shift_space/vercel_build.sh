@@ -6,7 +6,7 @@ trap 'ec=$?; echo "❌ Build failed at line $LINENO with exit code $ec"; exit $e
 echo "PWD=$(pwd)"
 ls -la
 
-# ===== Escolha a versão do Flutter (>= 3.27.x traz Dart 3.7+) =====
+# ===== Flutter (>=3.27.x — Dart 3.6) =====
 FLUTTER_VERSION="${FLUTTER_VERSION:-3.27.1-stable}"
 FLUTTER_ROOT="$PWD/_flutter"
 FLUTTER_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}.tar.xz"
@@ -36,6 +36,10 @@ flutter precache --web --suppress-analytics
 
 echo "➡️  pub get"
 flutter pub get
+
+echo "➡️  Codegen (freezed/json_serializable/riverpod)"
+# -d = delete-conflicting-outputs evita conflito com arquivos gerados
+dart run build_runner build -d
 
 echo "➡️  Verificando pubspec está aqui"
 test -f "pubspec.yaml"
