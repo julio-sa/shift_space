@@ -44,13 +44,13 @@ METEO_USERNAME = os.getenv("METEOMATICS_USERNAME")
 METEO_PASSWORD = os.getenv("METEOMATICS_PASSWORD")
 
 # ── Helpers (rótulos, regras e utilitários) ─────────────────────────────────────
-risk_labels = {0: "Baixo", 1: "Médio", 2: "Alto"}
+risk_labels = {0: "Low", 1: "Medium", 2: "High"}
 
 def get_recommendation(risk_level: int) -> str:
     if risk_level == 0:
-        return "Condições seguras para atividades ao ar livre."
+        return "Safe conditions to outdoor activities."
     if risk_level == 1:
-        return "Grupos sensíveis (crianças, idosos, asmáticos) devem limitar esforço prolongado ao ar livre."
+        return "Sensitive groups (children, elder, asthmatic) should limit prolonged outdoor exertion."
     return "Todos devem evitar atividades externas. Risco elevado de crises respiratórias."
 
 def compute_simple_risk(pm25_aqi: float | int | None, o3_aqi: float | int | None) -> int:
@@ -88,10 +88,10 @@ def _parse_ts(ts: str, tzname: Optional[str]) -> datetime:
     try:
         dt = datetime.fromisoformat(ts)
     except Exception:
-        raise HTTPException(status_code=400, detail=f"Timestamp inválido: {ts}")
+        raise HTTPException(status_code=400, detail=f"Invalid timestamp: {ts}")
     if dt.tzinfo is None:
         if not tzname:
-            raise HTTPException(status_code=400, detail="Faltou timezone (tz) ou offset no timestamp.")
+            raise HTTPException(status_code=400, detail="Missing timezone (tz) or offset at timestamp.")
         dt = dt.replace(tzinfo=zoneinfo.ZoneInfo(tzname))
     return dt.astimezone(timezone.utc)
 
@@ -101,7 +101,7 @@ def _parse_iso_date(d: str) -> str:
         dt = datetime.strptime(d, "%Y-%m-%d")
         return dt.strftime("%Y-%m-%d")
     except Exception:
-        raise HTTPException(status_code=400, detail=f"Data inválida (use YYYY-MM-DD): {d}")
+        raise HTTPException(status_code=400, detail=f"Invalid date (use YYYY-MM-DD): {d}")
 
 # ── Modelos Pydantic (requests) ────────────────────────────────────────────────
 class PredictionRequest(BaseModel):
@@ -148,7 +148,7 @@ def read_air_quality(
     country_hint = detect_country_by_zip(zip_code)
     geo = geocode_zip(zip_code, country_hint)
     if not geo:
-        raise HTTPException(status_code=404, detail="Código postal não encontrado")
+        raise HTTPException(status_code=404, detail="Zip code not found")
 
     # Data (YYYY-MM-DD)
     if date:
@@ -195,7 +195,7 @@ def predict(request: PredictionRequest):
     country_hint = detect_country_by_zip(zip_code)
     geo = geocode_zip(zip_code, country_hint)
     if not geo:
-        raise HTTPException(status_code=404, detail="Código postal/CEP não encontrado")
+        raise HTTPException(status_code=404, detail="Zip Code/CEP not found")
 
     data = fetch_combined_data_single(
         zip_code, geo["lat"], geo["lon"], date,
@@ -214,7 +214,7 @@ def predict(request: PredictionRequest):
     try:
         risk_int = int(risk_pred)
     except Exception:
-        raise HTTPException(status_code=500, detail="Modelo retornou formato de risco inválido")
+        raise HTTPException(status_code=500, detail="Invalid risk format returned")
 
     return {
         "location": {"zip_code": zip_code, "lat": geo["lat"], "lon": geo["lon"]},
@@ -238,13 +238,13 @@ def assess_event(req: EventAssessRequest):
     country_hint = detect_country_by_zip(req.zip_code)
     geo = geocode_zip(req.zip_code, country_hint)
     if not geo:
-        raise HTTPException(status_code=404, detail="CEP/ZIP não encontrado")
+        raise HTTPException(status_code=404, detail="CEP/ZIP not found")
 
     # 2) Normalizar janela para UTC
     dt_start_utc = _parse_ts(req.window.start, req.window.tz)
     dt_end_utc   = _parse_ts(req.window.end, req.window.tz)
     if dt_end_utc <= dt_start_utc:
-        raise HTTPException(status_code=400, detail="end deve ser maior que start")
+        raise HTTPException(status_code=400, detail="end must be greater than start")
 
     # 3) Buscar dados (exemplo: dia do início da janela)
     date = dt_start_utc.strftime("%Y-%m-%d")

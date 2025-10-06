@@ -27,7 +27,7 @@ while current <= end:
     date_list.append(current.strftime("%Y-%m-%d"))
     current += timedelta(days=1)
 
-print(f"📅 Coletando {len(date_list)} dias para São Paulo (2022–2024)...")
+print(f"📅 Collecting {len(date_list)} days for São Paulo (2022–2024)...")
 
 # Carregar progresso
 existing_dates = set()
@@ -37,18 +37,18 @@ if os.path.exists(OUTPUT_FILE):
         df = pd.read_csv(OUTPUT_FILE)
         all_data = df.to_dict("records")
         existing_dates = {row["date"] for row in all_data}
-        print(f"📥 Retomando: {len(all_data)} registros já coletados.")
+        print(f"📥 Restarting: {len(all_data)} records.")
     except Exception as e:
-        print(f"⚠️ Erro ao carregar CSV: {e}")
+        print(f"⚠️ Error while loading CSV: {e}")
 
 # Filtrar datas pendentes
 pending_dates = [d for d in date_list if d not in existing_dates]
-print(f"➡️  Restam {len(pending_dates)} dias para coletar.")
+print(f"➡️  {len(pending_dates)} days to collect.")
 
 # Coletar
 for i, date in enumerate(pending_dates):
     try:
-        print(f"[{i+1}/{len(pending_dates)}] Coletando {date}...")
+        print(f"[{i+1}/{len(pending_dates)}] Collecting {date}...")
         data = fetch_combined_data_single(
             zip_code="01000",
             lat=-23.5505,
@@ -65,16 +65,16 @@ for i, date in enumerate(pending_dates):
         # Salvar a cada 20 registros
         if len(all_data) % 20 == 0:
             pd.DataFrame(all_data).to_csv(OUTPUT_FILE, index=False)
-            print(f"💾 Salvo parcial: {len(all_data)} registros")
+            print(f"💾 Partially save: {len(all_data)} records")
 
         # Respeitar rate limit
         import time
         time.sleep(4)  # 4s → ~15 requisições/minuto
 
     except Exception as e:
-        print(f"❌ Erro em {date}: {e}")
+        print(f"❌ Error at {date}: {e}")
         # Continua mesmo com erro
 
 # Salvar final
 pd.DataFrame(all_data).to_csv(OUTPUT_FILE, index=False)
-print(f"\n✅ Coleta concluída! Total: {len(all_data)} registros em {OUTPUT_FILE}")
+print(f"\n✅ End! Total: {len(all_data)} records at {OUTPUT_FILE}")
