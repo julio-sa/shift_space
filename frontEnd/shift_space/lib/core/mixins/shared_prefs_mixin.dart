@@ -18,7 +18,7 @@ mixin SharedPrefsMixin {
         await prefs.setString(wrapper.key, jsonEncode(json));
       },
       onError: (e) {
-        Logger().e('Erro ao salvar o objeto localmente [${wrapper.key}]: $e');
+        Logger().e('Error to save object [${wrapper.key}]: $e');
       },
     );
   }
@@ -29,7 +29,7 @@ mixin SharedPrefsMixin {
     return handleResult(
       () async {
         final model = wrapper.model;
-        if (model == null) throw AppException("Model não inicializado.");
+        if (model == null) throw AppException("Model not initialized.");
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(wrapper.key, model.toString());
       },

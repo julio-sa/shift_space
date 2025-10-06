@@ -20,7 +20,7 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   String? currentZipCode;
-  DateTime selectedDate = DateTime.now(); // ✅ Data selecionada
+  DateTime selectedDate = DateTime.now(); 
 
   @override
   void initState() {
@@ -78,7 +78,6 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
       setState(() {
         selectedDate = picked;
         if (currentZipCode != null) {
-          // Refaz a pesquisa com a nova data
           _searchZipCode();
         }
       });
@@ -101,7 +100,7 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
               children: [
                 _buildHeader(),
                 const SizedBox(height: 32),
-                _buildSearchBar(), // ✅ Agora inclui localização
+                _buildSearchBar(), 
                 const SizedBox(height: 32),
                 if (currentZipCode != null) _buildDashboard(),
               ],
@@ -147,7 +146,7 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
                   ),
                 ),
                 Text(
-                  'Monitor Ambiental & Saúde',
+                  'Environmental & Health Monitor',
                   style: TextStyle(
                     color: ThemeColors.eighthColor,
                     fontSize: 16,
@@ -180,7 +179,7 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '🔍 Pesquisar Localização',
+            '🔍 Search localization',
             style: TextStyle(
               color: ThemeColors.mainColor,
               fontSize: 18,
@@ -246,7 +245,6 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
               ),
               const SizedBox(width: 8),
               
-              // ✅ Botão de Pesquisar
               ElevatedButton(
                 onPressed: _searchZipCode,
                 style: ElevatedButton.styleFrom(
@@ -262,7 +260,6 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
             ],
           ),
           
-          // ✅ Informações de localização (se disponível)
           if (currentZipCode != null) ...[
             const SizedBox(height: 20),
             Consumer(
@@ -305,7 +302,7 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
             ),
           ),
           const SizedBox(width: 12),
-          Text('Carregando localização...'),
+          Text('Loading location...'),
         ],
       ),
     );
@@ -323,7 +320,7 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
           Icon(Icons.error_outline, color: ThemeColors.redAccent, size: 16),
           const SizedBox(width: 8),
           Text(
-            'Erro ao carregar localização',
+            'Error loading location',
             style: TextStyle(color: ThemeColors.redAccent, fontSize: 12),
           ),
         ],
@@ -347,7 +344,7 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
               Icon(Icons.place, color: ThemeColors.mainColor, size: 16),
               const SizedBox(width: 8),
               Text(
-                'Localização Encontrada',
+                'Location Info found',
                 style: TextStyle(
                   color: ThemeColors.mainColor,
                   fontWeight: FontWeight.w600,
@@ -458,7 +455,7 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Alerta de Saúde',
+                  'Health Warning',
                   style: TextStyle(
                     color: _getRiskColor(risk.level),
                     fontWeight: FontWeight.bold,
@@ -472,7 +469,7 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'As condições ambientais atuais apresentam ${_getRiskDescription(risk.level)} para a saúde.',
+                'Current environmental conditions present ${_getRiskDescription(risk.level)} for health.',
                 style: const TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 16),
@@ -481,10 +478,10 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
                 _buildAlertItem('PM2.5', risk.pm25Value, risk.pm25Risk),
               
               if (risk.o3Risk.index >= RiskLevel.moderate.index)
-                _buildAlertItem('Ozônio', risk.o3Value, risk.o3Risk),
+                _buildAlertItem('Ozone', risk.o3Value, risk.o3Risk),
               
               if (risk.humidityRisk.index >= RiskLevel.moderate.index)
-                _buildAlertItem('Umidade', '${risk.humidityValue}%', risk.humidityRisk),
+                _buildAlertItem('Humidity', '${risk.humidityValue}%', risk.humidityRisk),
               
               const SizedBox(height: 16),
               Container(
@@ -562,23 +559,23 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
 
   String _getRiskDescription(RiskLevel level) {
     return switch (level) {
-      RiskLevel.good => 'nenhum risco',
-      RiskLevel.moderate => 'risco moderado',
-      RiskLevel.unhealthyForSensitive => 'risco para grupos sensíveis',
-      RiskLevel.unhealthy => 'risco para todos',
-      RiskLevel.veryUnhealthy => 'risco muito alto',
-      RiskLevel.hazardous => 'risco perigoso',
+      RiskLevel.good => 'any risk',
+      RiskLevel.moderate => 'moderate risk',
+      RiskLevel.unhealthyForSensitive => 'risk for sensitive groups',
+      RiskLevel.unhealthy => 'high risk',
+      RiskLevel.veryUnhealthy => 'very high risk',
+      RiskLevel.hazardous => 'extreme risk',
     };
   }
 
   String _getRecommendation(RiskLevel level) {
     return switch (level) {
-      RiskLevel.good => 'Condições ideais para atividades ao ar livre.',
+      RiskLevel.good => 'Ideal conditions for outdoor activities.',
       RiskLevel.moderate => 'Pessoas sensíveis devem considerar limitar atividades prolongadas ao ar livre.',
-      RiskLevel.unhealthyForSensitive => 'Crianças, idosos e pessoas com problemas respiratórios devem evitar atividades ao ar livre.',
-      RiskLevel.unhealthy => 'Todos devem evitar atividades ao ar livre. Mantenha janelas fechadas.',
-      RiskLevel.veryUnhealthy => 'Evite sair de casa. Use purificador de ar se possível.',
-      RiskLevel.hazardous => 'Emergência de saúde. Evite toda exposição ao ar livre.',
+      RiskLevel.unhealthyForSensitive => 'Sensitive individuals should consider limiting prolonged outdoor activities.',
+      RiskLevel.unhealthy => 'Everyone should avoid outdoor activities. Keep windows closed.',
+      RiskLevel.veryUnhealthy => 'Avoid leaving your home. Use an air purifier if possible.',
+      RiskLevel.hazardous => 'Health emergency. Avoid all outdoor exposure.',
     };
   }
 
@@ -610,7 +607,7 @@ class _DashBoardViewState extends ConsumerState<DashBoardView>
             ),
             const SizedBox(height: 16),
             Text(
-              'Carregando dados ambientais...',
+              'Loading environmental data...',
               style: TextStyle(
                 color: ThemeColors.grey600,
                 fontSize: 16,

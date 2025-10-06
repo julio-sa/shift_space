@@ -61,6 +61,6 @@ abstract class Wrapper<DTO, M, VO> {
     if(raw is HealthRisk) return HealthRiskWrapper(raw);
     if(raw is ApiResponse) return ApiResponseWrapper(raw);
     if(raw is Wrapper) return raw;
-    throw AppException('Objeto não possui wrapper');
+    throw AppException('Object not found');
   }
 }
